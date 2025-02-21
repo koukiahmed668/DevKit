@@ -1,0 +1,81 @@
+﻿@page "/"
+
+<div class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white font-sans">
+    <!-- Navigation Bar -->
+    <nav class="flex items-center justify-between p-6 border-b border-gray-700">
+        <div class="text-2xl font-bold">⚙️ DevToolbox</div>
+        <ul class="flex gap-6">
+            <li><a href="/json-formatter" class="hover:text-blue-400">JSON Formatter</a></li>
+            <li><a href="/yaml-formatter" class="hover:text-blue-400">YAML Formatter</a></li>
+            <li><a href="/xml-formatter" class="hover:text-blue-400">XML Formatter</a></li>
+            <li><a href="/hash-generator" class="hover:text-blue-400">Hash Generator</a></li>
+            <li><a href="/encoder-decoder" class="hover:text-blue-400">Encoder/Decoder</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="flex flex-col items-center justify-center text-center h-[80vh] px-4 relative">
+        <div class="absolute inset-0 bg-gradient-to-t from-blue-500 via-transparent to-transparent opacity-20"></div>
+        <h1 class="text-5xl font-extrabold mb-6 animate-fade-down">🚀 DevToolbox</h1>
+        <p class="text-xl mb-8 text-gray-300 animate-fade-up">Your all-in-one developer toolkit for formatting, encoding, and more!</p>
+
+        <!-- About Section -->
+        <section class="py-16 px-6 bg-gray-800">
+            <div class="max-w-4xl mx-auto text-center">
+                <h2 class="text-4xl font-bold mb-6">About DevToolbox</h2>
+                <p class="text-gray-300 mb-4">DevToolbox is designed to simplify the lives of developers by providing essential utilities like JSON, YAML, and XML formatters, hash generators, and encoding/decoding tools all in one place.</p>
+                <p class="text-gray-300">Built with modern web technologies and a sleek UI, DevToolbox helps developers be more productive with fewer distractions.</p>
+            </div>
+        </section>
+
+        <!-- Feature Icons -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-12">
+            <div class="p-4 bg-gray-800 rounded-lg flex flex-col items-center text-center hover:scale-105 transition">
+                <div class="text-4xl">🛠️</div>
+                <p class="mt-2 text-sm text-gray-300">Format JSON</p>
+            </div>
+            <div class="p-4 bg-gray-800 rounded-lg flex flex-col items-center text-center hover:scale-105 transition">
+                <div class="text-4xl">📄</div>
+                <p class="mt-2 text-sm text-gray-300">Validate XML</p>
+            </div>
+            <div class="p-4 bg-gray-800 rounded-lg flex flex-col items-center text-center hover:scale-105 transition">
+                <div class="text-4xl">🔑</div>
+                <p class="mt-2 text-sm text-gray-300">Generate Hash</p>
+            </div>
+            <div class="p-4 bg-gray-800 rounded-lg flex flex-col items-center text-center hover:scale-105 transition">
+                <div class="text-4xl">🔄</div>
+                <p class="mt-2 text-sm text-gray-300">Encode/Decode</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Documentation Section -->
+    <section class="py-16 px-6 bg-gray-800">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-3xl font-bold mb-6 text-center">📖 Documentation</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-2">JSON Formatter</h3>
+                    <p class="text-gray-300">Learn how to format and validate JSON data with just a few clicks.</p>
+                </div>
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-2">YAML Formatter</h3>
+                    <p class="text-gray-300">Easily convert and format YAML strings effortlessly.</p>
+                </div>
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-2">XML Formatter</h3>
+                    <p class="text-gray-300">Format and validate XML documents in no time.</p>
+                </div>
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <h3 class="text-xl font-semibold mb-2">Hash Generator</h3>
+                    <p class="text-gray-300">Generate secure hashes with different algorithms.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 border-t border-gray-700 text-sm text-gray-400">
+        © 2025 DevToolbox. All rights reserved.
+    </footer>
+</div>

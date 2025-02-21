@@ -1,0 +1,95 @@
+﻿@page "/encoder-decoder"
+@inject HttpClient Http
+@inject IJSRuntime JS
+<PageTitle>Encoder / Decoder</PageTitle>
+
+<div class="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-6">
+    <h1 class="text-4xl font-bold mb-6">🔑 Encoder / Decoder</h1>
+    <p class="text-gray-400 mb-6">Convert text to Base64, URL encoding, and decode JWT tokens.</p>
+
+    <div class="w-full max-w-lg bg-gray-800 p-6 rounded-lg shadow-lg">
+        <label class="block text-gray-300 text-sm font-semibold mb-2">Enter Text:</label>
+        <textarea @bind="InputText" class="w-full p-3 text-gray-900 rounded-md focus:ring focus:ring-blue-500" rows="3" placeholder="Type here..."></textarea>
+
+        <label class="block text-gray-300 text-sm font-semibold mt-4 mb-2">Select Type:</label>
+        <select @bind="SelectedType" class="w-full p-3 bg-gray-700 rounded-md">
+            <option value="base64-encode">Base64 Encode</option>
+            <option value="base64-decode">Base64 Decode</option>
+            <option value="url-encode">URL Encode</option>
+            <option value="url-decode">URL Decode</option>
+            <option value="jwt-decode">JWT Decode</option>
+        </select>
+
+        <button @onclick="ProcessEncoding" class="w-full mt-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition">
+            Convert
+        </button>
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <p class="mt-4 text-red-400 text-sm font-semibold">@ErrorMessage</p>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(EncodedResult))
+    {
+        <div class="mt-6 w-full max-w-lg bg-gray-800 p-6 rounded-lg shadow-lg">
+            <label class="block text-gray-300 text-sm font-semibold mb-2">Result:</label>
+            <div class="flex flex-col gap-3">
+                <textarea readonly class="w-full p-3 text-gray-900 rounded-md" rows="5">@EncodedResult</textarea>
+                <button @onclick="CopyResult" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition">📋 Copy</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string InputText { get; set; } = string.Empty;
+    private string SelectedType { get; set; } = "base64-encode";
+    private string EncodedResult { get; set; } = string.Empty;
+    private string ErrorMessage { get; set; } = string.Empty;
+
+    private async Task ProcessEncoding()
+    {
+        ErrorMessage = string.Empty;
+        EncodedResult = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(InputText))
+        {
+            ErrorMessage = "⚠️ Please enter some text to encode or decode.";
+            return;
+        }
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/encode-decode", new { InputText, Type = SelectedType });
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<EncodeDecodeResponse>();
+                EncodedResult = result?.Result ?? string.Empty;
+            }
+            else
+            {
+                ErrorMessage = $"⚠️ Error: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "⚠️ An error occurred while processing your request.";
+            Console.WriteLine($"[Error] {ex.Message}");
+        }
+    }
+
+    private async Task CopyResult()
+    {
+        if (!string.IsNullOrEmpty(EncodedResult))
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", EncodedResult);
+        }
+    }
+
+    private class EncodeDecodeResponse
+    {
+        public string Result { get; set; } = string.Empty;
+    }
+}

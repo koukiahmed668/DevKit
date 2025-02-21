@@ -1,0 +1,96 @@
+﻿@page "/json-formatter"
+@inject HttpClient Http
+
+<PageTitle>JSON Formatter & Validator</PageTitle>
+
+<div class="max-w-xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-xl border border-gray-300">
+    <h2 class="text-2xl font-extrabold mb-6 text-indigo-700">🛠️ JSON Formatter & Validator</h2>
+
+    <!-- Input Textarea -->
+    <textarea @bind="InputText"
+              class="w-full h-48 p-3 border-2 border-indigo-500 rounded-lg font-mono resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400"
+              placeholder="Enter JSON here..."></textarea>
+
+    <!-- Action Buttons -->
+    <div class="flex gap-4 mt-5">
+        <button @onclick="FormatJson"
+                class="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-300 shadow-md">
+            🚀 Format JSON
+        </button>
+        <button @onclick="ClearInput"
+                class="flex-1 px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-300 shadow-md">
+            🧹 Clear
+        </button>
+    </div>
+
+    <!-- Output Textarea -->
+    <div class="mt-6">
+        <label class="font-bold text-gray-700">📝 Formatted JSON:</label>
+        <textarea readonly
+                  class="w-full h-48 p-3 border-2 border-gray-400 rounded-lg font-mono bg-gray-100 resize-none text-gray-800"
+                  placeholder="Formatted JSON will appear here...">@FormattedText</textarea>
+    </div>
+
+    <!-- Validation Message -->
+    @if (!string.IsNullOrEmpty(ValidationMessage))
+    {
+        <div class="mt-4 p-3 text-center font-semibold text-lg rounded-md"
+             style="background-color: @(IsValid ? "rgb(209 250 229)" : "rgb(254 202 202)"); color: @(IsValid ? "green" : "red")">
+            @ValidationMessage
+        </div>
+    }
+</div>
+
+@code {
+    private string InputText { get; set; } = string.Empty;
+    private string FormattedText { get; set; } = string.Empty;
+    private string ValidationMessage { get; set; } = string.Empty;
+    private bool IsValid { get; set; }
+
+    private async Task FormatJson()
+    {
+        if (string.IsNullOrWhiteSpace(InputText))
+        {
+            ValidationMessage = "⚠️ Please provide JSON input.";
+            IsValid = false;
+            return;
+        }
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/json/format", new { Input = InputText });
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<JsonResponse>();
+                FormattedText = result?.FormattedJson ?? string.Empty;
+                ValidationMessage = "✅ Valid JSON!";
+                IsValid = true;
+            }
+            else
+            {
+                FormattedText = string.Empty;
+                ValidationMessage = "❌ Invalid JSON!";
+                IsValid = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            FormattedText = string.Empty;
+            ValidationMessage = $"⚠️ Error: {ex.Message}";
+            IsValid = false;
+        }
+    }
+
+    private void ClearInput()
+    {
+        InputText = string.Empty;
+        FormattedText = string.Empty;
+        ValidationMessage = string.Empty;
+    }
+
+    private class JsonResponse
+    {
+        public string FormattedJson { get; set; } = string.Empty;
+    }
+}

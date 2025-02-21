@@ -1,0 +1,69 @@
+﻿@page "/hash-generator"
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<PageTitle>Hash Generator</PageTitle>
+
+<div class="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-6">
+    <h1 class="text-4xl font-bold mb-6">🔐 Hash Generator</h1>
+    <p class="text-gray-400 mb-6">Generate secure hashes using various algorithms.</p>
+
+    <div class="w-full max-w-lg bg-gray-800 p-6 rounded-lg shadow-lg">
+        <label class="block text-gray-300 text-sm font-semibold mb-2">Enter Text:</label>
+        <input @bind="InputText" class="w-full p-3 text-gray-900 rounded-md focus:ring focus:ring-blue-500" placeholder="Type here..." />
+
+        <label class="block text-gray-300 text-sm font-semibold mt-4 mb-2">Select Algorithm:</label>
+        <select @bind="SelectedAlgorithm" class="w-full p-3 bg-gray-700 rounded-md">
+            <option>MD5</option>
+            <option>SHA-1</option>
+            <option>SHA-256</option>
+            <option>SHA-512</option>
+        </select>
+
+        <button @onclick="GenerateHash" class="w-full mt-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition">
+            Generate Hash
+        </button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(GeneratedHash))
+    {
+        <div class="mt-6 w-full max-w-lg bg-gray-800 p-6 rounded-lg shadow-lg">
+            <label class="block text-gray-300 text-sm font-semibold mb-2">Generated Hash:</label>
+            <div class="flex items-center gap-2">
+                <input readonly value="@GeneratedHash" class="w-full p-3 text-gray-900 rounded-md" />
+                <button @onclick="CopyHash" class="px-3 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition">📋 Copy</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string InputText { get; set; } = string.Empty;
+    private string SelectedAlgorithm { get; set; } = "SHA-256";
+    private string GeneratedHash { get; set; } = string.Empty;
+
+    private async Task GenerateHash()
+    {
+        if (string.IsNullOrWhiteSpace(InputText)) return;
+
+        var response = await Http.PostAsJsonAsync("api/hash/generate", new { InputText, Algorithm = SelectedAlgorithm });
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<HashResponse>();
+            GeneratedHash = result?.Hash ?? string.Empty;
+        }
+    }
+
+    private async Task CopyHash()
+    {
+        if (!string.IsNullOrEmpty(GeneratedHash))
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", GeneratedHash);
+        }
+    }
+
+    private class HashResponse
+    {
+        public string Hash { get; set; } = string.Empty;
+    }
+}
