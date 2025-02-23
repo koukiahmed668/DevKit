@@ -1,0 +1,139 @@
+﻿@page "/regex-tester"
+@inject IJSRuntime JS
+<PageTitle>Regex Tester & Generator</PageTitle>
+
+<div class="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-6">
+    <h1 class="text-4xl font-bold mb-6">🔍 Regex Tester & Generator</h1>
+    <p class="text-gray-400 mb-6">Test and generate regular expressions easily.</p>
+
+    <div class="w-full max-w-lg bg-gray-800 p-6 rounded-lg shadow-lg">
+        <h2 class="text-lg font-semibold text-gray-300">📝 Regex Tester</h2>
+
+        <label class="block text-gray-300 text-sm font-semibold mt-4 mb-2">Enter Text:</label>
+        <textarea @bind="InputText" class="w-full p-3 text-gray-900 rounded-md focus:ring focus:ring-blue-500" rows="4" placeholder="Type text here..."></textarea>
+
+        <label class="block text-gray-300 text-sm font-semibold mt-4 mb-2">Enter Regex Pattern:</label>
+        <input @bind="RegexPattern" class="w-full p-3 bg-gray-700 rounded-md" placeholder="e.g., \b\w+\b" />
+
+        <button @onclick="TestRegex" class="w-full mt-4 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition">
+            Test Regex
+        </button>
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <p class="mt-4 text-red-400 text-sm font-semibold">⚠️ @ErrorMessage</p>
+        }
+
+        @if (Matches.Count > 0)
+        {
+            <div class="mt-6 bg-gray-700 p-4 rounded-lg">
+                <label class="block text-gray-300 text-sm font-semibold mb-2">Matches Found:</label>
+                <ul class="list-disc pl-5 text-green-400">
+                    @foreach (var match in Matches)
+                    {
+                        <li>@match</li>
+                    }
+                </ul>
+                <button @onclick="CopyMatches" class="w-full mt-4 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition">📋 Copy Matches</button>
+            </div>
+        }
+    </div>
+
+    <div class="w-full max-w-lg bg-gray-800 p-6 rounded-lg shadow-lg mt-8">
+        <h2 class="text-lg font-semibold text-gray-300">🛠 Regex Generator</h2>
+
+        <label class="block text-gray-300 text-sm font-semibold mt-4 mb-2">Select a Common Pattern:</label>
+        <select @bind="SelectedPattern" class="w-full p-3 bg-gray-700 rounded-md">
+            <option value="">Select a pattern</option>
+            <option value="email">Email</option>
+            <option value="phone">Phone Number</option>
+            <option value="url">URL</option>
+            <option value="ipv4">IPv4 Address</option>
+            <option value="ipv6">IPv6 Address</option>
+            <option value="date">Date (YYYY-MM-DD)</option>
+        </select>
+
+        @if (!string.IsNullOrEmpty(GeneratedRegex))
+        {
+            <div class="mt-6 bg-gray-700 p-4 rounded-lg">
+                <label class="block text-gray-300 text-sm font-semibold mb-2">Generated Regex:</label>
+                <input readonly class="w-full p-3 text-gray-900 rounded-md" value="@GeneratedRegex" />
+                <button @onclick="CopyGeneratedRegex" class="w-full mt-4 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition">📋 Copy Regex</button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private string InputText { get; set; } = string.Empty;
+    private string RegexPattern { get; set; } = string.Empty;
+    private List<string> Matches { get; set; } = new();
+    private string ErrorMessage { get; set; } = string.Empty;
+
+    private string _selectedPattern = string.Empty;
+    private string SelectedPattern
+    {
+        get => _selectedPattern;
+        set
+        {
+            _selectedPattern = value;
+            GenerateRegex();
+        }
+    }
+    private string GeneratedRegex { get; set; } = string.Empty;
+
+    private void TestRegex()
+    {
+        ErrorMessage = string.Empty;
+        Matches.Clear();
+
+        if (string.IsNullOrWhiteSpace(InputText) || string.IsNullOrWhiteSpace(RegexPattern))
+        {
+            ErrorMessage = "Please enter text and a regex pattern.";
+            return;
+        }
+
+        try
+        {
+            var regex = new System.Text.RegularExpressions.Regex(RegexPattern);
+            var matches = regex.Matches(InputText);
+            Matches = matches.Select(m => m.Value).ToList();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Invalid regex pattern!";
+            Console.WriteLine($"[Regex Error] {ex.Message}");
+        }
+    }
+
+    private async Task CopyMatches()
+    {
+        if (Matches.Count > 0)
+        {
+            var text = string.Join(", ", Matches);
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", text);
+        }
+    }
+
+    private void GenerateRegex()
+    {
+        GeneratedRegex = SelectedPattern switch
+        {
+            "email" => @"^[\w\.-]+@[\w\.-]+\.\w{2,}$",
+            "phone" => @"^\+?[1-9]\d{1,14}$",
+            "url" => @"^https?:\/\/[^\s/$.?#].[^\s]*$",
+            "ipv4" => @"^(?:\d{1,3}\.){3}\d{1,3}$",
+            "ipv6" => @"^([a-fA-F0-9]{1,4}:){7,7}[a-fA-F0-9]{1,4}$",
+            "date" => @"^\d{4}-\d{2}-\d{2}$",
+            _ => string.Empty
+        };
+    }
+
+    private async Task CopyGeneratedRegex()
+    {
+        if (!string.IsNullOrEmpty(GeneratedRegex))
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", GeneratedRegex);
+        }
+    }
+}
